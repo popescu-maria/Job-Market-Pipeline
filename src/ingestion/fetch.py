@@ -3,7 +3,23 @@ import httpx
 URL_TEMPLATES = {
     "greenhouse": "https://boards-api.greenhouse.io/v1/boards/{slug}/jobs",
     "ashby": "https://api.ashbyhq.com/posting-api/job-board/{slug}",
+    "lever": "https://api.lever.co/v0/postings/{slug}?mode=json",
 }   
+
+def extract_greenhouse_jobs(data):
+    return data["jobs"]
+
+def extract_ashby_jobs(data):
+    return data["jobs"]
+
+def extract_lever_jobs(data):
+    return data
+
+JOB_EXTRACTORS = {
+    "greenhouse": extract_greenhouse_jobs,
+    "ashby": extract_ashby_jobs,
+    "lever": extract_lever_jobs,
+}
 
 def build_url(ats, slug):
     if ats not in URL_TEMPLATES:
@@ -15,10 +31,4 @@ def fetch_jobs(ats, slug):
     response = httpx.get(url)
     response.raise_for_status()
     data = response.json()
-    return data["jobs"]
-
-if __name__ == "__main__":
-    ats = "greenhouse"
-    slug = "grafanalabs"
-    jobs = fetch_jobs(ats, slug)
-    print(jobs[0]["title"]) 
+    return JOB_EXTRACTORS[ats](data)
