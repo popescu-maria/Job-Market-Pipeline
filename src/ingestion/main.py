@@ -1,38 +1,52 @@
+import asyncio
 import csv
-import json
+import time
+
+import httpx
 
 from fetch import fetch_jobs
 from normalize import NORMALIZERS
-from db import connect, upsert_job
+from db import connect, upsert_jobs
 
 
-def process_company(ats, slug, company):
+async def process_company(ats, slug, company, client):
     if ats not in NORMALIZERS:
         print(f"Skipping {company}: no normalizer for ats '{ats}'")
         return []
 
-    raw_jobs = fetch_jobs(ats, slug)
+    try:
+        raw_jobs = await fetch_jobs(ats, slug, client)
+    except Exception as e:
+        print(f"Error processing {company}: {e}")
+        return []
+
     normalized = [NORMALIZERS[ats](job, company) for job in raw_jobs]
+    print(f"{company}: {len(normalized)} jobs")
     return normalized
 
 
-if __name__ == "__main__":
-    all_jobs = []
-
+async def main():
     with open("config/sources.csv", newline="") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            try:
-                company_jobs = process_company(row["ats"], row["slug"], row["company"])
-            except Exception as e:
-                print(f"Error processing {row['company']}: {e}")
-                continue
-            print(f"{row['company']}: {len(company_jobs)} jobs")
-            all_jobs.extend(company_jobs)
+        rows = list(csv.DictReader(f))
+
+    async with httpx.AsyncClient() as client:
+        tasks = [
+            process_company(row["ats"], row["slug"], row["company"], client)
+            for row in rows
+        ]
+        results = await asyncio.gather(*tasks)
+
+    all_jobs = [job for company_jobs in results for job in company_jobs]
 
     conn = connect()
-    for job in all_jobs:
-        upsert_job(conn, job)
+    upsert_jobs(conn, all_jobs)
     conn.close()
 
-    print(f"Wrote {len(all_jobs)} jobs to Postgres")
+    print(f"\nWrote {len(all_jobs)} jobs to Postgres")
+
+
+if __name__ == "__main__":
+    start = time.time()
+    asyncio.run(main())
+    elapsed = time.time() - start
+    print(f"Elapsed time: {elapsed:.2f} seconds")

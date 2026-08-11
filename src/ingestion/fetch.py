@@ -26,9 +26,9 @@ def build_url(ats, slug):
         raise ValueError(f"Unknown ATS: {ats}")
     return URL_TEMPLATES[ats].format(slug=slug)
 
-def fetch_jobs(ats, slug):
+async def fetch_jobs(ats, slug, client: httpx.AsyncClient):
     url = build_url(ats, slug)
-    response = httpx.get(url)
+    response = await client.get(url)
     response.raise_for_status()
     data = response.json()
     return JOB_EXTRACTORS[ats](data)
