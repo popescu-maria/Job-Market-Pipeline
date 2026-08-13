@@ -1,14 +1,18 @@
 import psycopg
+import os
+
+from dotenv import load_dotenv
 from psycopg.types.json import Jsonb
 
+load_dotenv()
 
 def connect():
     return psycopg.connect(
-        host="localhost",
-        port=5432,
-        dbname="jobs",
-        user="jobs",
-        password="jobs",
+        host=os.environ.get("DB_HOST"),
+        port=os.environ.get("DB_PORT"),
+        dbname=os.environ.get("DB_NAME"),
+        user=os.environ.get("DB_USER"),
+        password=os.environ.get("DB_PASSWORD"),
     )
 
 
