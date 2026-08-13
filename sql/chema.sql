@@ -9,5 +9,6 @@ CREATE TABLE jobs (
     raw_json      JSONB,
     first_seen_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     last_seen_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    closed_at     TIMESTAMPTZ,
     PRIMARY KEY (source, external_id)
 );

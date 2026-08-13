@@ -25,6 +25,7 @@ UPSERT_SQL = """
         url = EXCLUDED.url,
         posted_at = EXCLUDED.posted_at,
         raw_json = EXCLUDED.raw_json,
+        closed_at = NULL,
         last_seen_at = now();
 """
 
@@ -33,4 +34,28 @@ def upsert_jobs(conn, jobs):
     jobs_for_db = [{**job, "raw_json": Jsonb(job["raw_json"])} for job in jobs]
     with conn.cursor() as cur:
         cur.executemany(UPSERT_SQL, jobs_for_db)
+    conn.commit()
+
+
+def mark_closed_jobs(conn, successful_sources, run_started_at):
+    if not successful_sources:
+        return
+
+    placeholders = ", ".join(["(%s, %s)"] * len(successful_sources))
+    sql = f"""
+        UPDATE jobs
+        SET closed_at = now()
+        WHERE closed_at IS NULL
+          AND last_seen_at < %s
+          AND (source, company) IN ({placeholders})
+    """
+
+    params = [run_started_at]
+    for ats, company in successful_sources:
+        params.append(ats)
+        params.append(company)
+
+    with conn.cursor() as cur:
+        cur.execute(sql, params)
+        print(f"Marked {cur.rowcount} jobs as closed")
     conn.commit()
