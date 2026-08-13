@@ -7,6 +7,7 @@ CREATE TABLE jobs (
     company       TEXT,
     posted_at     TEXT,
     raw_json      JSONB,
+    description   TEXT,
     first_seen_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     last_seen_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     closed_at     TIMESTAMPTZ,

@@ -1,7 +1,7 @@
 import httpx
 
 URL_TEMPLATES = {
-    "greenhouse": "https://boards-api.greenhouse.io/v1/boards/{slug}/jobs",
+    "greenhouse": "https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true",
     "ashby": "https://api.ashbyhq.com/posting-api/job-board/{slug}",
     "lever": "https://api.lever.co/v0/postings/{slug}?mode=json",
 }   

@@ -10,6 +10,7 @@ def normalize_greenhouse_job(raw_job, company):
         "company": company,
         "source": "greenhouse",
         "posted_at": raw_job["first_published"],
+        "description": raw_job.get("content"),
         "raw_json": raw_job,
     }
 
@@ -23,6 +24,7 @@ def normalize_ashby_job(raw_job, company):
         "company": company,
         "source": "ashby",
         "posted_at": raw_job["publishedAt"],
+        "description": raw_job.get("descriptionPlain"),
         "raw_json": raw_job,
     }
 
@@ -36,6 +38,7 @@ def normalize_lever_job(raw_job, company):
         "company": company,
         "source": "lever",
         "posted_at": raw_job["createdAt"],
+        "description": raw_job.get("descriptionPlain"),
         "raw_json": raw_job,
     }
 
