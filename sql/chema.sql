@@ -8,6 +8,7 @@ CREATE TABLE jobs (
     posted_at     TEXT,
     raw_json      JSONB,
     description   TEXT,
+    skills TEXT[],
     first_seen_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     last_seen_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     closed_at     TIMESTAMPTZ,

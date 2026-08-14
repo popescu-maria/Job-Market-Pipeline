@@ -16,14 +16,15 @@ def connect():
     )
 
 UPSERT_SQL = """
-    INSERT INTO jobs (source, external_id, title, location, url, company, posted_at, description, raw_json, last_seen_at)
-    VALUES (%(source)s, %(external_id)s, %(title)s, %(location)s, %(url)s, %(company)s, %(posted_at)s, %(description)s, %(raw_json)s, now())
+    INSERT INTO jobs (source, external_id, title, location, url, company, posted_at, description, skills, raw_json, last_seen_at)
+    VALUES (%(source)s, %(external_id)s, %(title)s, %(location)s, %(url)s, %(company)s, %(posted_at)s, %(description)s, %(skills)s, %(raw_json)s, now())
     ON CONFLICT (source, external_id) DO UPDATE SET
         title = EXCLUDED.title,
         location = EXCLUDED.location,
         url = EXCLUDED.url,
         posted_at = EXCLUDED.posted_at,
         description = EXCLUDED.description,
+        skills = EXCLUDED.skills,
         raw_json = EXCLUDED.raw_json,
         closed_at = NULL,
         last_seen_at = now();

@@ -4,10 +4,11 @@ import time
 
 import httpx
 
-from fetch import fetch_jobs
-from normalize import NORMALIZERS
-from db import connect, upsert_jobs, mark_closed_jobs
 from datetime import datetime, timezone
+from src.ingestion.fetch import fetch_jobs
+from src.ingestion.normalize import NORMALIZERS
+from src.ingestion.db import connect, upsert_jobs, mark_closed_jobs
+from src.enrich.skills import extract_skills
 
 async def process_company(ats, slug, company, client):
     if ats not in NORMALIZERS:
@@ -21,6 +22,9 @@ async def process_company(ats, slug, company, client):
         return False, []
 
     normalized = [NORMALIZERS[ats](job, company) for job in raw_jobs]
+    for job in normalized:
+        job["skills"] = extract_skills(job.get("description"))
+
     print(f"{company}: {len(normalized)} jobs")
     return True, normalized
 
@@ -56,6 +60,9 @@ async def main():
 
 if __name__ == "__main__":
     start = time.time()
+
     asyncio.run(main())
+
     elapsed = time.time() - start
+
     print(f"Elapsed time: {elapsed:.2f} seconds")
