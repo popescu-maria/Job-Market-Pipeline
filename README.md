@@ -27,7 +27,7 @@ docker exec -it job-market-pipeline-postgres-1 psql -U jobs -d jobs
 Run the pipeline:
  
 ```bash
-python src/ingestion/main.py
+python -m src/ingestion/main.py
 ```
  
 ## Status
